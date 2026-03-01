@@ -1,5 +1,41 @@
 /* Admin Dashboard Styles */
 
+/* Admin Profile Card */
+.admin-profile-card {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+}
+
+.profile-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-field:last-child {
+    border-bottom: none;
+}
+
+.profile-field label {
+    font-weight: 500;
+    color: #333;
+    flex: 0 0 120px;
+}
+
+.profile-field span {
+    flex: 1;
+    color: #666;
+}
+
+.profile-field .edit-btn {
+    flex: 0 0 auto;
+    margin-left: 10px;
+}
+
 /* Admin Tabs Container with Scroll */
 .admin-tabs-container {
     position: relative;

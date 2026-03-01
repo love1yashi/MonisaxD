@@ -96,6 +96,26 @@ function showToast(message, type = 'success') {
 window.showToast = showToast;
 
 // =====================
+// TOGGLE PASSWORD VISIBILITY
+// =====================
+function togglePassword(passwordFieldId, iconId) {
+    const passwordField = document.getElementById(passwordFieldId);
+    const iconElement = document.getElementById(iconId);
+    
+    if (passwordField && iconElement) {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            iconElement.textContent = '🙈';
+        } else {
+            passwordField.type = 'password';
+            iconElement.textContent = '👁';
+        }
+    }
+}
+
+window.togglePassword = togglePassword;
+
+// =====================
 // LOGIN FORM HANDLER
 // =====================
 const loginForm = document.getElementById('loginForm');
@@ -138,17 +158,54 @@ const productsListData = {
 
 function addToCartFromList(productId) {
     const product = productsListData[productId];
-    if (product && window.cartFunctions) {
-        const cartItem = {
-            id: productId,
-            name: product.name,
-            price: product.price,
-            color: 'Default',
-            quantity: 1,
-            image: product.image
-        };
-        window.cartFunctions.addToCart(cartItem);
+    if (product) {
+        // Try to use cartFunctions if available, otherwise use direct addToCart
+        if (window.cartFunctions && window.cartFunctions.addToCart) {
+            const cartItem = {
+                id: productId,
+                name: product.name,
+                price: product.price,
+                color: 'Default',
+                quantity: 1,
+                image: product.image
+            };
+            window.cartFunctions.addToCart(cartItem);
+        } else if (window.addToCart) {
+            // Fallback to direct addToCart function if available
+            window.addToCart(productId, product.name, product.price);
+        } else {
+            // Last resort: directly add to localStorage cart
+            const cartKey = 'cart_guest';
+            let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    selected: false
+                });
+            }
+            localStorage.setItem(cartKey, JSON.stringify(cart));
+            // Update cart badge
+            updateCartBadge();
+        }
         showToast('Added ' + product.name + ' to cart!', 'success');
+    }
+}
+
+// Update cart badge directly
+function updateCartBadge() {
+    const cartBadge = document.getElementById('cartBadge');
+    if (cartBadge) {
+        const cartKey = 'cart_guest';
+        const cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartBadge.textContent = totalItems;
+        cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 }
 
@@ -208,6 +265,59 @@ if (adminLoginForm) {
                 if (window.adminFunctions) {
                     window.adminFunctions.initAdmin();
                 }
+            } else {
+                showToast(result.message, 'error');
+            }
+        }
+    });
+}
+
+// =====================
+// ADMIN REGISTRATION FORM HANDLER
+// =====================
+// Switch to registration form
+const goToAdminRegister = document.getElementById('goToAdminRegister');
+if (goToAdminRegister) {
+    goToAdminRegister.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('adminLoginSection').style.display = 'none';
+        document.getElementById('adminRegisterSection').style.display = 'block';
+    });
+}
+
+// Switch back to login form
+const goToAdminLogin = document.getElementById('goToAdminLogin');
+if (goToAdminLogin) {
+    goToAdminLogin.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('adminRegisterSection').style.display = 'none';
+        document.getElementById('adminLoginSection').style.display = 'block';
+    });
+}
+
+// Handle admin registration
+const adminRegisterForm = document.getElementById('adminRegisterForm');
+if (adminRegisterForm) {
+    adminRegisterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('registerAdminUsername').value;
+        const password = document.getElementById('registerAdminPassword').value;
+        const confirmPassword = document.getElementById('registerAdminConfirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            showToast('Passwords do not match!', 'error');
+            return;
+        }
+        
+        if (window.authFunctions) {
+            const result = window.authFunctions.registerAdmin(username, password);
+            if (result.success) {
+                showToast('Admin registered successfully! You can now login.', 'success');
+                // Switch back to login form
+                document.getElementById('adminRegisterSection').style.display = 'none';
+                document.getElementById('adminLoginSection').style.display = 'block';
+                // Clear the registration form
+                document.getElementById('adminRegisterForm').reset();
             } else {
                 showToast(result.message, 'error');
             }

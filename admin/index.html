@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Admin Dashboard Modal -->
+    <div id="adminModal" class="admin-dashboard modal">
+        <div class="modal-content">
+            <div class="admin-header">
+                <h3>Admin Dashboard</h3>
+                <button class="close-modal" onclick="closeAdminModal()">&times;</button>
+            </div>
+            
+            <!-- Admin Tabs -->
+            <div class="admin-tabs-container">
+                <div class="admin-tabs-scroll">
+                    <button class="admin-tab active" data-tab="users">Users</button>
+                    <button class="admin-tab" data-tab="products">Products</button>
+                    <button class="admin-tab" data-tab="categories">Categories</button>
+                    <button class="admin-tab" data-tab="suppliers">Suppliers</button>
+                    <button class="admin-tab" data-tab="orders">Orders</button>
+                </div>
+            </div>
+            
+            <!-- Tab Contents -->
+            <!-- Users Tab -->
+            <div id="usersTab" class="admin-content" style="display: block;">
+                <div style="margin-bottom: 15px;">
+                    <button id="addUserBtn" class="admin-action-btn">Add User</button>
+                </div>
+                <div id="usersList"></div>
+            </div>
+            
+            <!-- Products Tab -->
+            <div id="productsTab" class="admin-content">
+                <div style="margin-bottom: 15px;">
+                    <button id="addProductBtn" class="admin-action-btn">Add Product</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Categories Tab -->
+            <div id="categoriesTab" class="admin-content">
+                <div style="margin-bottom: 15px;">
+                    <button id="addCategoryBtn" class="admin-action-btn">Add Category</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Product Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Suppliers Tab -->
+            <div id="suppliersTab" class="admin-content">
+                <div style="margin-bottom: 15px;">
+                    <button id="addSupplierBtn" class="admin-action-btn">Add Supplier</button>
+                </div>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Products</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suppliersTableBody"></tbody>
+                </table>
+            </div>
+            
+            <!-- Orders Tab -->
+            <div id="ordersTab" class="admin-content">
+                <div id="ordersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal styles (inline since there's no separate modal.css) -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        
+        .close-modal:hover {
+            color: #000;
+        }
+    </style>
+
+    <script src="admin.js"></script>
+    <script>
+        // Modal functions
+        function openAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.add('show');
+            if (window.adminFunctions) {
+                window.adminFunctions.initAdmin();
+            }
+        }
+        
+        function closeAdminModal() {
+            const modal = document.getElementById('adminModal');
+            modal.classList.remove('show');
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('adminModal');
+            if (event.target === modal) {
+                closeAdminModal();
+            }
+        }
+        
+        // Open admin modal on page load for demo
+        window.addEventListener('load', function() {
+            openAdminModal();
+        });
+    </script>
+</body>
+</html>

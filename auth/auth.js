@@ -2,11 +2,65 @@
 // AUTHENTICATION MODULE
 // =====================
 
-// Admin credentials (in real app, this should be on server)
-const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123'
-};
+// Admin credentials stored in localStorage (dynamic, not hardcoded)
+// Initialize with default admin if no admins exist
+function initializeAdminAccounts() {
+    const admins = localStorage.getItem('adminAccounts');
+    if (!admins) {
+        const defaultAdmin = [{
+            id: 1,
+            username: '',
+            password: '',
+            createdAt: new Date().toISOString()
+        }];
+        localStorage.setItem('adminAccounts', JSON.stringify(defaultAdmin));
+    }
+}
+
+// Get all admin accounts
+function getAdminAccounts() {
+    initializeAdminAccounts();
+    return JSON.parse(localStorage.getItem('adminAccounts')) || [];
+}
+
+// Save admin accounts
+function saveAdminAccounts(admins) {
+    localStorage.setItem('adminAccounts', JSON.stringify(admins));
+}
+
+// Register a new admin account (limit to one admins)
+function registerAdmin(username, password) {
+    const admins = getAdminAccounts();
+    
+    // Check if admin account already exists (limit to one accounts)
+    if (admins.length >= 1) {
+        return { success: false, message: 'Only one admin account is allowed. Please login with existing credentials.' };
+    }
+    
+    // Check if username already exists
+    if (admins.find(a => a.username === username)) {
+        return { success: false, message: 'Username already exists' };
+    }
+    
+    const newAdmin = {
+        id: Date.now(),
+        username,
+        password,
+        createdAt: new Date().toISOString()
+    };
+    
+    admins.push(newAdmin);
+    saveAdminAccounts(admins);
+    
+    return { success: true, admin: newAdmin };
+}
+
+// Delete an admin account
+function deleteAdminAccount(adminId) {
+    let admins = getAdminAccounts();
+    admins = admins.filter(a => a.id !== adminId);
+    saveAdminAccounts(admins);
+}
 
 // Get current user
 function getCurrentUser() {
@@ -63,11 +117,15 @@ function logoutUser() {
     window.location.reload();
 }
 
-// Admin login
+// Admin login - uses dynamic admin accounts from localStorage
 function adminLogin(username, password) {
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+    const admins = getAdminAccounts();
+    const admin = admins.find(a => a.username === username && a.password === password);
+    
+    if (admin) {
         localStorage.setItem('isAdminLoggedIn', 'true');
-        return { success: true };
+        localStorage.setItem('currentAdmin', JSON.stringify(admin));
+        return { success: true, admin };
     }
     return { success: false, message: 'Invalid admin credentials' };
 }
@@ -168,7 +226,11 @@ window.authFunctions = {
     getAllUsers,
     deleteUser,
     addUser,
-    updateUser
+    updateUser,
+    // New admin account functions
+    registerAdmin,
+    getAdminAccounts,
+    deleteAdminAccount
 };
 
 // Initialize auth functions when DOM is ready

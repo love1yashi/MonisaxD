@@ -2,6 +2,96 @@
 // ADMIN MODULE
 // =====================
 
+// Load admin profile
+function loadAdminProfile() {
+    const adminUsernameDisplay = document.getElementById('adminUsernameDisplay');
+    const adminCreatedAt = document.getElementById('adminCreatedAt');
+    
+    if (!adminUsernameDisplay) return;
+    
+    const currentAdmin = JSON.parse(localStorage.getItem('currentAdmin'));
+    const admins = JSON.parse(localStorage.getItem('adminAccounts')) || [];
+    
+    let admin = currentAdmin || (admins.length > 0 ? admins[0] : null);
+    
+    if (admin) {
+        adminUsernameDisplay.textContent = admin.username;
+        if (adminCreatedAt) {
+            adminCreatedAt.textContent = new Date(admin.createdAt).toLocaleDateString();
+        }
+    } else {
+        adminUsernameDisplay.textContent = 'No admin';
+        if (adminCreatedAt) {
+            adminCreatedAt.textContent = '-';
+        }
+    }
+}
+
+// Edit admin username
+window.editAdminUsername = function() {
+    const currentAdmin = JSON.parse(localStorage.getItem('currentAdmin'));
+    const admins = JSON.parse(localStorage.getItem('adminAccounts')) || [];
+    
+    const adminId = currentAdmin ? currentAdmin.id : (admins.length > 0 ? admins[0].id : null);
+    if (!adminId) return;
+    
+    const admin = admins.find(a => a.id === adminId);
+    const newUsername = prompt('Enter new username:', admin ? admin.username : '');
+    
+    if (newUsername && newUsername.trim() !== '') {
+        if (admins.find(a => a.username === newUsername && a.id !== adminId)) {
+            alert('Username already exists!');
+            return;
+        }
+        
+        const index = admins.findIndex(a => a.id === adminId);
+        if (index !== -1) {
+            admins[index].username = newUsername;
+            localStorage.setItem('adminAccounts', JSON.stringify(admins));
+            
+            if (currentAdmin) {
+                currentAdmin.username = newUsername;
+                localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+            }
+            
+            loadAdminProfile();
+            alert('Username updated successfully!');
+        }
+    }
+};
+
+// Edit admin password
+window.editAdminPassword = function() {
+    const currentAdmin = JSON.parse(localStorage.getItem('currentAdmin'));
+    const admins = JSON.parse(localStorage.getItem('adminAccounts')) || [];
+    
+    const adminId = currentAdmin ? currentAdmin.id : (admins.length > 0 ? admins[0].id : null);
+    if (!adminId) return;
+    
+    const newPassword = prompt('Enter new password:');
+    const confirmPassword = prompt('Confirm new password:');
+    
+    if (!newPassword || !confirmPassword) return;
+    
+    if (newPassword !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+    
+    const index = admins.findIndex(a => a.id === adminId);
+    if (index !== -1) {
+        admins[index].password = newPassword;
+        localStorage.setItem('adminAccounts', JSON.stringify(admins));
+        
+        if (currentAdmin) {
+            currentAdmin.password = newPassword;
+            localStorage.setItem('currentAdmin', JSON.stringify(currentAdmin));
+        }
+        
+        alert('Password updated successfully!');
+    }
+};
+
 // Admin tab switching
 function setupAdminTabs() {
     const adminTabs = document.querySelectorAll('.admin-tab');
@@ -19,6 +109,11 @@ function setupAdminTabs() {
             const selectedTab = document.getElementById(`${tabName}Tab`);
             if (selectedTab) {
                 selectedTab.style.display = 'block';
+            }
+            
+            // Load admin profile when Admin tab is clicked
+            if (tabName === 'admin') {
+                loadAdminProfile();
             }
         });
     });
@@ -395,7 +490,6 @@ function loadOrders() {
     }
     
     ordersList.innerHTML = orders.map(order => {
-        // Build shipping address HTML if available
         let shippingAddressHTML = '';
         if (order.shippingAddress) {
             const addr = order.shippingAddress;
@@ -456,6 +550,7 @@ window.updateOrderStatus = function(orderId, status) {
 // Initialize admin functions
 function initAdmin() {
     setupAdminTabs();
+    loadAdminProfile();
     loadUsers();
     loadProducts();
     loadCategories();
@@ -474,7 +569,8 @@ window.adminFunctions = {
     loadProducts,
     loadCategories,
     loadSuppliers,
-    loadOrders
+    loadOrders,
+    loadAdminProfile
 };
 
 // Initialize admin functions when DOM is ready

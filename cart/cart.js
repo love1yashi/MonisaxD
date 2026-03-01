@@ -609,3 +609,22 @@ window.clearCart = function() {
     cart = [];
     updateCartUI();
 };
+
+// Export cart functions for use in other modules
+window.cartFunctions = {
+    addToCart: function(item) {
+        // Handle both object format and individual parameters
+        if (typeof item === 'object' && item.id) {
+            addToCart(item.id, item.name, item.price);
+        }
+    },
+    getCart: getCart,
+    getSelectedItems: getSelectedItems,
+    getCartTotal: getCartTotal,
+    getSelectedTotal: getSelectedTotal,
+    getCartItemCount: getCartItemCount,
+    loadUserCart: loadUserCart,
+    clearCart: clearCart,
+    openCart: openCart,
+    closeCart: closeCart
+};
